@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Crypto Price Tracker",
+  "version": "1.1",
+  "description": "Theo dõi giá coin theo cặp tuỳ chọn.",
+  "permissions": [
+    "alarms",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://fapi.binance.com/*",
+    "https://api.binance.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.js", "style.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+
+}

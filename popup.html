@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Price Tracker</title>
+    <!-- Nếu bạn tách CSS ra style.css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Crypto Tracker</h1>
+            <p>Giá cryptocurrency theo thời gian thực</p>
+        </div>
+
+        <div class="coin-selector">
+            <label for="coin-select">Chọn tiền điện tử</label>
+            <select id="coin-select">
+                <option value="BTCUSDT">🟠 Bitcoin (BTC)</option>
+                <option value="ETHUSDT">🔷 Ethereum (ETH)</option>
+                <option value="LINKUSDT">🔗 Chainlink (LINK)</option>
+                <option value="LTCUSDT">🥈 Litecoin (LTC)</option>
+                <option value="XRPUSDT">💧 XRP (XRP)</option>
+                <option value="TAOUSDT">🧠 Bittensor (TAO)</option>
+                <option value="THEUSDT">🎯 Thena (THE)</option>
+                <option value="SUIUSDT">🌊 Sui (SUI)</option>
+                <option value="SOLUSDT">☀️ Solana (SOL)</option>
+                <option value="ENAUSDT">⚡ Ethena (ENA)</option>
+                <option value="ZROUSDT">🌉 LayerZero (ZRO)</option>
+                <option value="ETHFIUSDT">🔥 Ether.fi (ETHFI)</option>
+                <option value="APTUSDT">🚀 Aptos (APT)</option>
+                <option value="BIOUSDT">🧬 BIO Protocol (BIO)</option>
+                <option value="WLDUSDT">🌍 Worldcoin (WLD)</option>
+            </select>
+        </div>
+
+        <div class="price-display">
+            <div id="price" class="loading">
+                <span class="spinner"></span>
+                Đang tải...
+            </div>
+            <div class="price-label">Giá hiện tại (USDT)</div>
+        </div>
+
+        <div class="update-time" id="update-time">
+            Chưa có dữ liệu
+        </div>
+
+        <div class="footer">
+            <p>Dữ liệu được cập nhật theo thời gian thực</p>
+        </div>
+    </div>
+
+    <!-- JS nằm ở file riêng -->
+    <script src="popup.js"></script>
+</body>
+
+</html>
