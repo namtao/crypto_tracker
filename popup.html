@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Crypto Price Tracker</title>
-    <!-- Nếu bạn tách CSS ra style.css -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -15,26 +14,20 @@
             <p>Giá cryptocurrency theo thời gian thực</p>
         </div>
 
-        <div class="coin-selector">
-            <label for="coin-select">Chọn tiền điện tử</label>
-            <select id="coin-select">
-			  <option value="BTCUSDT">🟠 Bitcoin (BTC)</option>
-			  <option value="ETHUSDT">🔷 Ethereum (ETH)</option>
-			  <option value="HYPEUSDT">🔗 Hypelink (HYPE)</option>
-			</select>
-
-        </div>
-
-        <div class="price-display">
-            <div id="price" class="loading">
-                <span class="spinner"></span>
-                Đang tải...
-            </div>
-            <div class="price-label">Giá hiện tại (USDT)</div>
+        <div id="coin-cards" class="coin-cards">
+            <!-- Coin price cards will be dynamically inserted here -->
         </div>
 
         <div class="update-time" id="update-time">
             Chưa có dữ liệu
+        </div>
+
+        <div class="add-coin-section">
+            <div class="add-coin-input-row">
+                <input type="text" id="add-coin-input" placeholder="Nhập symbol (vd: BTC, SOL...)" autocomplete="off">
+                <button id="add-coin-btn" title="Thêm coin">＋</button>
+            </div>
+            <div id="add-coin-error" class="add-coin-error"></div>
         </div>
 
         <div class="footer">
@@ -42,7 +35,6 @@
         </div>
     </div>
 
-    <!-- JS nằm ở file riêng -->
     <script src="popup.js"></script>
 </body>
 

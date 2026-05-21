@@ -1,7 +1,7 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-width: 300px;
+    min-width: 340px;
     margin: 0;
     padding: 15px;
     color: #2c3e50;
@@ -24,47 +24,212 @@ body {
     text-align: center;
     color: #555;
     font-size: 13px;
+    margin-bottom: 10px;
 }
 
-.coin-selector {
-    margin: 15px 0;
+/* Coin Cards Grid */
+.coin-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 10px 0;
 }
 
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #444;
-}
-
-select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    background: white;
-}
-
-.price-display {
+.coin-card {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     border-radius: 12px;
-    padding: 15px;
+    padding: 12px;
     text-align: center;
-    margin: 15px 0;
     color: white;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
-#price {
-    font-size: 22px;
+.coin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.coin-card:nth-child(2n) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.coin-card:nth-child(3n) {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.coin-card:nth-child(4n) {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.coin-card:nth-child(5n) {
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+}
+
+.coin-card:nth-child(6n) {
+    background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
+}
+
+.coin-card:nth-child(7n) {
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+}
+
+.coin-card:nth-child(8n) {
+    background: linear-gradient(135deg, #f5576c 0%, #ff6a00 100%);
+}
+
+.coin-card-error {
+    background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%) !important;
+}
+
+/* Remove coin button */
+.remove-coin-btn {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    border: none;
+    color: white;
+    font-size: 11px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    padding: 0;
+    line-height: 1;
+}
+
+.coin-card:hover .remove-coin-btn {
+    opacity: 1;
+}
+
+.remove-coin-btn:hover {
+    background: rgba(231, 76, 60, 0.8);
+}
+
+.coin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.coin-icon {
+    font-size: 18px;
+}
+
+.coin-name {
+    font-size: 14px;
     font-weight: bold;
-    margin-bottom: 5px;
+    letter-spacing: 0.5px;
 }
 
-.price-label {
-    font-size: 12px;
+.coin-price {
+    font-size: 17px;
+    font-weight: bold;
+    margin: 4px 0;
+    word-break: break-all;
+}
+
+.coin-pair {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.no-coins {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    padding: 20px;
+}
+
+/* Add Coin Section */
+.add-coin-section {
+    margin-top: 12px;
+}
+
+.add-coin-input-row {
+    display: flex;
+    gap: 6px;
+}
+
+.add-coin-input-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.add-coin-input-row input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+.add-coin-input-row input::placeholder {
+    color: #aaa;
+}
+
+.add-coin-input-row button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    min-width: 40px;
+}
+
+.add-coin-input-row button:hover {
     opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.add-coin-input-row button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.add-coin-error {
+    color: #e74c3c;
+    font-size: 11px;
+    margin-top: 4px;
+    display: none;
+}
+
+/* Price up/down animation on cards */
+.card-up {
+    animation: cardGreenFlash 0.6s;
+}
+
+.card-down {
+    animation: cardRedFlash 0.6s;
+}
+
+@keyframes cardGreenFlash {
+    0% { box-shadow: none; }
+    50% { box-shadow: 0 0 16px 4px rgba(46, 204, 113, 0.6); transform: scale(1.03); }
+    100% { box-shadow: none; }
+}
+
+@keyframes cardRedFlash {
+    0% { box-shadow: none; }
+    50% { box-shadow: 0 0 16px 4px rgba(231, 76, 60, 0.6); transform: scale(1.03); }
+    100% { box-shadow: none; }
 }
 
 .update-time {
@@ -79,27 +244,6 @@ select {
     font-size: 11px;
     color: #888;
     margin-top: 10px;
-}
-
-/* Hiệu ứng giá lên/xuống */
-.price-up {
-    animation: greenFlash 0.6s;
-}
-
-.price-down {
-    animation: redFlash 0.6s;
-}
-
-@keyframes greenFlash {
-    0% { color: white; }
-    50% { color: #2ecc71; transform: scale(1.1); }
-    100% { color: white; }
-}
-
-@keyframes redFlash {
-    0% { color: white; }
-    50% { color: #e74c3c; transform: scale(1.1); }
-    100% { color: white; }
 }
 
 /* Spinner */
