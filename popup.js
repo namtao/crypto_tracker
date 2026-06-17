@@ -231,10 +231,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAllPrices();
     });
 
-    // Auto-refresh every 3 seconds
-    const intervalId = setInterval(() => {
-        updateAllPrices();
-    }, 3000);
+    // Auto-refresh prices every 3 seconds
+    const priceIntervalId = setInterval(updateAllPrices, 3000);
 
-    window.addEventListener('unload', () => clearInterval(intervalId));
+    // Rotate badge every 5 seconds while popup is open
+    // (background alarm minimum is 30s; popup drives 5s rotation when visible)
+    const badgeIntervalId = setInterval(() => {
+        chrome.runtime.sendMessage({ type: 'rotateBadge' });
+    }, 5000);
+
+    window.addEventListener('unload', () => {
+        clearInterval(priceIntervalId);
+        clearInterval(badgeIntervalId);
+    });
 });
