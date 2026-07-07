@@ -13,33 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Map to store previous prices for each coin (for up/down animation)
     const previousPrices = {};
 
-    // Known coin icons (fallback to 💰 for custom coins)
-    const coinIcons = {
-        BTC: '🟠', ETH: '🔷', HYPE: '🔗', BNB: '🟡',
-        SOL: '🟣', XRP: '⚪', DOGE: '🐕', ADA: '🔵',
-        AVAX: '🔺', DOT: '⚫', MATIC: '🟣', LINK: '🔵',
-        UNI: '🦄', ATOM: '⚛️', FTM: '👻', NEAR: '🌐',
-        APT: '🅰️', ARB: '🔵', OP: '🔴', SUI: '💧',
-    };
-
     // Current tracked symbols
     let trackedSymbols = ["BTCUSDT", "ETHUSDT"];
-
-    function getIcon(symbol) {
-        const short = symbol.replace('USDT', '');
-        return coinIcons[short] || '💰';
-    }
 
     function getShortName(symbol) {
         return symbol.replace('USDT', '');
     }
 
     async function fetchPrice(symbol) {
-        const res = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`, { cache: 'no-store' });
+        // klines interval=1d bắt đầu từ 00:00 UTC (tức 7h sáng giờ VN)
+        const res = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=1`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (!data.price) throw new Error('No price in response');
-        return parseFloat(data.price);
+        if (!data[0] || !data[0][4]) throw new Error('No price in response');
+        
+        const openPrice = parseFloat(data[0][1]); // Giá mở cửa lúc 7h sáng
+        const currentPrice = parseFloat(data[0][4]); // Giá hiện tại
+        const change = ((currentPrice - openPrice) / openPrice) * 100;
+        
+        return { price: currentPrice, change: change };
     }
 
     async function fetchMultiplePrices(symbols) {
@@ -75,53 +67,129 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.status === 'fulfilled') {
                 const { symbol, price } = result.value;
-                const icon = getIcon(symbol);
+                const currentPrice = price.price;
+                const change = price.change;
                 const short = getShortName(symbol);
-                const formattedPrice = formatPriceValue(price);
+                
+                // Fetch icon từ cryptologos.cc
+                const iconName = short.toLowerCase();
+                const cryptoLogosNames = {
+                    'btc': 'bitcoin-btc-logo.png',
+                    'eth': 'ethereum-eth-logo.png',
+                    'bnb': 'bnb-bnb-logo.png',
+                    'sol': 'solana-sol-logo.png',
+                    'xrp': 'xrp-xrp-logo.png',
+                    'doge': 'dogecoin-doge-logo.png',
+                    'ada': 'cardano-ada-logo.png',
+                    'avax': 'avalanche-avax-logo.png',
+                    'dot': 'polkadot-new-dot-logo.png',
+                    'matic': 'polygon-matic-logo.png',
+                    'link': 'chainlink-link-logo.png',
+                    'uni': 'uniswap-uni-logo.png',
+                    'atom': 'cosmos-atom-logo.png',
+                    'ftm': 'fantom-ftm-logo.png',
+                    'near': 'near-protocol-near-logo.png',
+                    'apt': 'aptos-apt-logo.png',
+                    'arb': 'arbitrum-arb-logo.png',
+                    'op': 'optimism-op-logo.png',
+                    'sui': 'sui-sui-logo.png',
+                };
+                
+                const logoFile = cryptoLogosNames[iconName] || 'bitcoin-btc-logo.png'; // Default fallback
+                const iconUrl = `https://cryptologos.cc/logos/${logoFile}`;
+                
+                const formattedPrice = formatPriceValue(currentPrice);
 
                 // Determine price direction
                 let directionClass = '';
-                let arrow = '';
                 if (previousPrices[symbol] !== undefined) {
-                    if (price > previousPrices[symbol]) {
+                    if (currentPrice > previousPrices[symbol]) {
                         directionClass = 'card-up';
-                        arrow = ' ▲';
-                    } else if (price < previousPrices[symbol]) {
+                    } else if (currentPrice < previousPrices[symbol]) {
                         directionClass = 'card-down';
-                        arrow = ' ▼';
                     }
                 }
-                previousPrices[symbol] = price;
+                previousPrices[symbol] = currentPrice;
 
                 if (directionClass) {
                     card.classList.add(directionClass);
                 }
+                
+                const changeColor = change >= 0 ? '#228B22' : '#DC143C';
+                const changeSign = change > 0 ? '+' : '';
+
+                // Tránh lỗi CSP bằng cách bỏ onerror inline và gắn sự kiện bằng addEventListener
+                const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FF9900'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>${short.slice(0,3)}</text></svg>`;
 
                 card.innerHTML = `
                     <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${short}">✕</button>
                     <div class="coin-card-header">
-                        <span class="coin-icon">${icon}</span>
+                        <img src="${iconUrl}" class="coin-icon" alt="${short}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;">
                         <span class="coin-name">${short}</span>
                     </div>
-                    <div class="coin-price">${formattedPrice}${arrow}</div>
-                    <div class="coin-pair">USDT</div>
+                    <div class="coin-price">${formattedPrice}</div>
+                    <div class="coin-pair">
+                        USDT <span style="color: ${changeColor}; font-weight: bold; margin-left: 4px;">${changeSign}${change.toFixed(2)}%</span>
+                    </div>
                 `;
+                
+                const imgEl = card.querySelector('img.coin-icon');
+                if (imgEl) {
+                    imgEl.addEventListener('error', function() {
+                        this.src = fallbackSvg;
+                    }, { once: true });
+                }
             } else {
                 // Failed to fetch - still show card with symbol info
                 const symbol = trackedSymbols[index];
                 const short = symbol ? getShortName(symbol) : 'ERR';
-                const icon = symbol ? getIcon(symbol) : '❌';
+                
+                const iconName = short.toLowerCase();
+                
+                // Ánh xạ tên đồng coin của cryptologos.cc
+                const cryptoLogosNames = {
+                    'btc': 'bitcoin-btc-logo.png',
+                    'eth': 'ethereum-eth-logo.png',
+                    'bnb': 'bnb-bnb-logo.png',
+                    'sol': 'solana-sol-logo.png',
+                    'xrp': 'xrp-xrp-logo.png',
+                    'doge': 'dogecoin-doge-logo.png',
+                    'ada': 'cardano-ada-logo.png',
+                    'avax': 'avalanche-avax-logo.png',
+                    'dot': 'polkadot-new-dot-logo.png',
+                    'matic': 'polygon-matic-logo.png',
+                    'link': 'chainlink-link-logo.png',
+                    'uni': 'uniswap-uni-logo.png',
+                    'atom': 'cosmos-atom-logo.png',
+                    'ftm': 'fantom-ftm-logo.png',
+                    'near': 'near-protocol-near-logo.png',
+                    'apt': 'aptos-apt-logo.png',
+                    'arb': 'arbitrum-arb-logo.png',
+                    'op': 'optimism-op-logo.png',
+                    'sui': 'sui-sui-logo.png',
+                };
+                
+                const logoFile = cryptoLogosNames[iconName] || 'bitcoin-btc-logo.png'; // Default fallback
+                const iconUrl = `https://cryptologos.cc/logos/${logoFile}`;
+                const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23DC143C'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>ERR</text></svg>`;
 
                 card.innerHTML = `
                     <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${short}">✕</button>
                     <div class="coin-card-header">
-                        <span class="coin-icon">${icon}</span>
+                        <img src="${iconUrl}" class="coin-icon" alt="${short}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;">
                         <span class="coin-name">${short}</span>
                     </div>
                     <div class="coin-price">Lỗi tải</div>
                     <div class="coin-pair">USDT</div>
                 `;
                 card.classList.add('coin-card-error');
+                
+                const imgEl = card.querySelector('img.coin-icon');
+                if (imgEl) {
+                    imgEl.addEventListener('error', function() {
+                        this.src = fallbackSvg;
+                    }, { once: true });
+                }
             }
 
             coinCardsContainer.appendChild(card);

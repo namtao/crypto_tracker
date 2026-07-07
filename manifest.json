@@ -9,7 +9,8 @@
   ],
   "host_permissions": [
     "https://fapi.binance.com/*",
-    "https://api.binance.com/*"
+    "https://api.binance.com/*",
+    "https://cryptologos.cc/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -29,8 +30,16 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["popup.js", "style.css"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "popup.js",
+        "style.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data: https://cryptologos.cc;"
+  }
 }
