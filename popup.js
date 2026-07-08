@@ -71,33 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const change = price.change;
                 const short = getShortName(symbol);
                 
-                // Fetch icon từ cryptologos.cc
-                const iconName = short.toLowerCase();
-                const cryptoLogosNames = {
-                    'btc': 'bitcoin-btc-logo.png',
-                    'eth': 'ethereum-eth-logo.png',
-                    'bnb': 'bnb-bnb-logo.png',
-                    'sol': 'solana-sol-logo.png',
-                    'xrp': 'xrp-xrp-logo.png',
-                    'doge': 'dogecoin-doge-logo.png',
-                    'ada': 'cardano-ada-logo.png',
-                    'avax': 'avalanche-avax-logo.png',
-                    'dot': 'polkadot-new-dot-logo.png',
-                    'matic': 'polygon-matic-logo.png',
-                    'link': 'chainlink-link-logo.png',
-                    'uni': 'uniswap-uni-logo.png',
-                    'atom': 'cosmos-atom-logo.png',
-                    'ftm': 'fantom-ftm-logo.png',
-                    'near': 'near-protocol-near-logo.png',
-                    'apt': 'aptos-apt-logo.png',
-                    'arb': 'arbitrum-arb-logo.png',
-                    'op': 'optimism-op-logo.png',
-                    'sui': 'sui-sui-logo.png',
-                };
-                
-                const logoFile = cryptoLogosNames[iconName] || 'bitcoin-btc-logo.png'; // Default fallback
-                const iconUrl = `https://cryptologos.cc/logos/${logoFile}`;
-                
+                const iconUrl = getCoinLogoUrl(short);
+
                 const formattedPrice = formatPriceValue(currentPrice);
 
                 // Determine price direction
@@ -144,33 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const symbol = trackedSymbols[index];
                 const short = symbol ? getShortName(symbol) : 'ERR';
                 
-                const iconName = short.toLowerCase();
-                
-                // Ánh xạ tên đồng coin của cryptologos.cc
-                const cryptoLogosNames = {
-                    'btc': 'bitcoin-btc-logo.png',
-                    'eth': 'ethereum-eth-logo.png',
-                    'bnb': 'bnb-bnb-logo.png',
-                    'sol': 'solana-sol-logo.png',
-                    'xrp': 'xrp-xrp-logo.png',
-                    'doge': 'dogecoin-doge-logo.png',
-                    'ada': 'cardano-ada-logo.png',
-                    'avax': 'avalanche-avax-logo.png',
-                    'dot': 'polkadot-new-dot-logo.png',
-                    'matic': 'polygon-matic-logo.png',
-                    'link': 'chainlink-link-logo.png',
-                    'uni': 'uniswap-uni-logo.png',
-                    'atom': 'cosmos-atom-logo.png',
-                    'ftm': 'fantom-ftm-logo.png',
-                    'near': 'near-protocol-near-logo.png',
-                    'apt': 'aptos-apt-logo.png',
-                    'arb': 'arbitrum-arb-logo.png',
-                    'op': 'optimism-op-logo.png',
-                    'sui': 'sui-sui-logo.png',
-                };
-                
-                const logoFile = cryptoLogosNames[iconName] || 'bitcoin-btc-logo.png'; // Default fallback
-                const iconUrl = `https://cryptologos.cc/logos/${logoFile}`;
+                const iconUrl = getCoinLogoUrl(short);
                 const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23DC143C'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>ERR</text></svg>`;
 
                 card.innerHTML = `

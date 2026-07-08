@@ -1,3 +1,5 @@
+importScripts('coin-logos.js');
+
 async function fetchDailyData(symbol) {
     // klines interval=1d bắt đầu từ 00:00 UTC (tức 7h sáng giờ VN)
     const res = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=1`, { cache: 'no-store' });
@@ -45,30 +47,7 @@ async function updateBadgeFromCoins(coins) {
 
     // Cập nhật icon từ cryptologos.cc
     const shortName = coin.symbol.replace('USDT', '').toLowerCase();
-    const cryptoLogosNames = {
-        'btc': 'bitcoin-btc-logo.png',
-        'eth': 'ethereum-eth-logo.png',
-        'bnb': 'bnb-bnb-logo.png',
-        'sol': 'solana-sol-logo.png',
-        'xrp': 'xrp-xrp-logo.png',
-        'doge': 'dogecoin-doge-logo.png',
-        'ada': 'cardano-ada-logo.png',
-        'avax': 'avalanche-avax-logo.png',
-        'dot': 'polkadot-new-dot-logo.png',
-        'matic': 'polygon-matic-logo.png',
-        'link': 'chainlink-link-logo.png',
-        'uni': 'uniswap-uni-logo.png',
-        'atom': 'cosmos-atom-logo.png',
-        'ftm': 'fantom-ftm-logo.png',
-        'near': 'near-protocol-near-logo.png',
-        'apt': 'aptos-apt-logo.png',
-        'arb': 'arbitrum-arb-logo.png',
-        'op': 'optimism-op-logo.png',
-        'sui': 'sui-sui-logo.png',
-    };
-    
-    const logoFile = cryptoLogosNames[shortName] || 'bitcoin-btc-logo.png'; // Default fallback
-    const iconUrl = `https://cryptologos.cc/logos/${logoFile}`;
+    const iconUrl = getCoinLogoUrl(shortName);
 
     try {
         const iconRes = await fetch(iconUrl);
