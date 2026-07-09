@@ -2,15 +2,17 @@ importScripts('coin-logos.js', 'exchanges.js', 'storage.js');
 
 function formatBadgeChange(percent) {
     if (percent === 0) return "0";
-    const sign = percent > 0 ? "+" : "-";
+    // Bỏ dấu "+" cho số dương: màu nền badge (xanh/đỏ) đã thể hiện chiều tăng/giảm,
+    // trong khi dấu "+" chiếm nhiều bề rộng khiến chữ số phía sau bị cắt mất.
+    const sign = percent > 0 ? "" : "-";
     const abs = Math.abs(percent);
 
-    // Nếu tỉ lệ biến động trên 100%, chỉ hiện số làm tròn (VD: +150)
-    if (abs >= 99.5) return sign + Math.round(abs);       // "+100"
+    // Nếu tỉ lệ biến động trên 100%, chỉ hiện số làm tròn (VD: 150 hoặc -150)
+    if (abs >= 99.5) return sign + Math.round(abs);       // "100"
 
-    // Cố gắng rút gọn nhất có thể: "+1.2", "-5", để tránh badge quá to
-    if (Number.isInteger(abs)) return sign + abs;         // "+5"
-    return sign + abs.toFixed(1);                         // "+1.2" (tối đa 4 ký tự nhưng thường là 3-4 ký tự)
+    // Cố gắng rút gọn nhất có thể: "1.2", "-5", để tránh badge quá to
+    if (Number.isInteger(abs)) return sign + abs;         // "5"
+    return sign + abs.toFixed(1);                         // "1.2"
 }
 
 async function updateBadgeFromCoins(coins) {
