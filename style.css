@@ -3,28 +3,57 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-width: 340px;
     margin: 0;
-    padding: 15px;
+    padding: 10px;
     color: #2c3e50;
 }
 
 .container {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 14px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .header h1 {
-    font-size: 20px;
-    margin: 0;
+    font-size: 17px;
+    margin: 0 0 8px;
     text-align: center;
 }
 
-.header p {
-    text-align: center;
+.selector-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
     color: #555;
-    font-size: 13px;
-    margin-bottom: 10px;
+}
+
+.selector-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selector-divider {
+    width: 1px;
+    height: 12px;
+    background: #ddd;
+}
+
+.exchange-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.exchange-checkbox input {
+    cursor: pointer;
+    margin: 0;
 }
 
 /* Coin Cards Grid */
@@ -36,51 +65,34 @@ body {
 }
 
 .coin-card {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #f7f8fc;
+    border: 1px solid #e7e9f2;
     border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-    color: white;
-    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 10px 12px;
+    color: #1e293b;
+    transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
 }
 
 .coin-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.coin-card:nth-child(2n) {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+.coin-trend-up {
+    background: #e6f7ec;
+    border-color: #bfe3cc;
 }
 
-.coin-card:nth-child(3n) {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.coin-card:nth-child(4n) {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.coin-card:nth-child(5n) {
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-}
-
-.coin-card:nth-child(6n) {
-    background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
-}
-
-.coin-card:nth-child(7n) {
-    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-}
-
-.coin-card:nth-child(8n) {
-    background: linear-gradient(135deg, #f5576c 0%, #ff6a00 100%);
+.coin-trend-down {
+    background: #fdecec;
+    border-color: #f3c6c6;
 }
 
 .coin-card-error {
-    background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%) !important;
+    background: #f1f2f5;
+    border-color: #d8dae2;
 }
 
 /* Remove coin button */
@@ -113,34 +125,68 @@ body {
     background: rgba(231, 76, 60, 0.8);
 }
 
-.coin-card-header {
+.coin-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 6px;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.coin-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.coin-values {
+    text-align: right;
+    flex-shrink: 0;
 }
 
 .coin-icon {
-    font-size: 18px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    vertical-align: middle;
+    background: white;
+    padding: 2px;
+    box-sizing: content-box;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
 }
 
 .coin-name {
     font-size: 14px;
     font-weight: bold;
+    color: #1e293b;
     letter-spacing: 0.5px;
 }
 
 .coin-price {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: bold;
-    margin: 4px 0;
+    color: #0f172a;
     word-break: break-all;
 }
 
 .coin-pair {
-    font-size: 11px;
-    opacity: 0.8;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-top: 3px;
+}
+
+.coin-trend-up .coin-pair {
+    color: #15803d;
+}
+
+.coin-trend-down .coin-pair {
+    color: #dc2626;
 }
 
 .no-coins {
@@ -153,7 +199,7 @@ body {
 
 /* Add Coin Section */
 .add-coin-section {
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 .add-coin-input-row {
@@ -236,14 +282,7 @@ body {
     font-size: 11px;
     color: #666;
     text-align: center;
-    margin-top: 5px;
-}
-
-.footer {
-    text-align: center;
-    font-size: 11px;
-    color: #888;
-    margin-top: 10px;
+    margin-top: 4px;
 }
 
 /* Spinner */

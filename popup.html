@@ -11,7 +11,19 @@
     <div class="container">
         <div class="header">
             <h1>💰 Crypto Tracker</h1>
-            <p>Giá cryptocurrency theo thời gian thực</p>
+        </div>
+
+        <div class="selector-row">
+            <div class="selector-group">
+                <label class="exchange-checkbox"><input type="checkbox" class="exchange-checkbox-input" value="binance">Binance</label>
+                <label class="exchange-checkbox"><input type="checkbox" class="exchange-checkbox-input" value="okx">OKX</label>
+                <label class="exchange-checkbox"><input type="checkbox" class="exchange-checkbox-input" value="bitget">Bitget</label>
+            </div>
+            <span class="selector-divider"></span>
+            <div class="selector-group">
+                <label class="exchange-checkbox"><input type="checkbox" class="market-type-checkbox-input" value="spot">Spot</label>
+                <label class="exchange-checkbox"><input type="checkbox" class="market-type-checkbox-input" value="futures">Futures</label>
+            </div>
         </div>
 
         <div id="coin-cards" class="coin-cards">
@@ -29,13 +41,11 @@
             </div>
             <div id="add-coin-error" class="add-coin-error"></div>
         </div>
-
-        <div class="footer">
-            <p>Dữ liệu được cập nhật theo thời gian thực</p>
-        </div>
     </div>
 
     <script src="coin-logos.js"></script>
+    <script src="exchanges.js"></script>
+    <script src="storage.js"></script>
     <script src="popup.js"></script>
 </body>
 

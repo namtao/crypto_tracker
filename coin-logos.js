@@ -1,132 +1,51 @@
-// cryptologos.cc filenames don't always match the ticker (e.g. XAUT is
-// "tether-gold-xaut-logo.png", not "xaut-xaut-logo.png"). Verify a new
-// entry resolves with a HEAD request before adding it here.
-const COIN_LOGOS = {
-    btc: 'bitcoin-btc-logo.png',
-    eth: 'ethereum-eth-logo.png',
-    bnb: 'bnb-bnb-logo.png',
-    sol: 'solana-sol-logo.png',
-    xrp: 'xrp-xrp-logo.png',
-    doge: 'dogecoin-doge-logo.png',
-    ada: 'cardano-ada-logo.png',
-    avax: 'avalanche-avax-logo.png',
-    dot: 'polkadot-new-dot-logo.png',
-    matic: 'polygon-matic-logo.png',
-    link: 'chainlink-link-logo.png',
-    uni: 'uniswap-uni-logo.png',
-    atom: 'cosmos-atom-logo.png',
-    ftm: 'fantom-ftm-logo.png',
-    near: 'near-protocol-near-logo.png',
-    apt: 'aptos-apt-logo.png',
-    arb: 'arbitrum-arb-logo.png',
-    op: 'optimism-ethereum-op-logo.png',
-    sui: 'sui-sui-logo.png',
-    xaut: 'tether-gold-xaut-logo.png',
+// Logo lookup via CoinGecko public API (no key needed), cached in
+// chrome.storage.local for 30 days since logos almost never change and the
+// public API is rate-limited. Falls back to a generated letter-avatar SVG
+// for symbols CoinGecko doesn't recognize or when the API call fails.
+const LOGO_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-    // Stablecoins
-    usdt: 'tether-usdt-logo.png',
-    usdc: 'usd-coin-usdc-logo.png',
-    busd: 'binance-usd-busd-logo.png',
-    dai: 'multi-collateral-dai-dai-logo.png',
-    tusd: 'trueusd-tusd-logo.png',
-    usdd: 'usdd-usdd-logo.png',
-    paxg: 'pax-gold-paxg-logo.png',
+function buildFallbackLogo(shortSymbol) {
+    const label = shortSymbol.slice(0, 3).toUpperCase();
+    return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FF9900'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>${label}</text></svg>`;
+}
 
-    // Large caps / L1s
-    ton: 'toncoin-ton-logo.png',
-    trx: 'tron-trx-logo.png',
-    shib: 'shiba-inu-shib-logo.png',
-    ltc: 'litecoin-ltc-logo.png',
-    bch: 'bitcoin-cash-bch-logo.png',
-    leo: 'unus-sed-leo-leo-logo.png',
-    etc: 'ethereum-classic-etc-logo.png',
-    xlm: 'stellar-xlm-logo.png',
-    xmr: 'monero-xmr-logo.png',
-    okb: 'okb-okb-logo.png',
-    fil: 'filecoin-fil-logo.png',
-    hbar: 'hedera-hbar-logo.png',
-    vet: 'vechain-vet-logo.png',
-    icp: 'internet-computer-icp-logo.png',
-    imx: 'immutable-x-imx-logo.png',
-    inj: 'injective-inj-logo.png',
-    egld: 'multiversx-egld-egld-logo.png',
-    flow: 'flow-flow-logo.png',
-    theta: 'theta-network-theta-logo.png',
-    eos: 'eos-eos-logo.png',
-    xtz: 'tezos-xtz-logo.png',
-    kava: 'kava-kava-logo.png',
-    neo: 'neo-neo-logo.png',
-    kda: 'kadena-kda-logo.png',
-    rose: 'oasis-network-rose-logo.png',
-    cfx: 'conflux-network-cfx-logo.png',
-    sei: 'sei-sei-logo.png',
-    tia: 'celestia-tia-logo.png',
-    stx: 'stacks-stx-logo.png',
-    ksm: 'kusama-ksm-logo.png',
-    one: 'harmony-one-logo.png',
-    iota: 'iota-iota-logo.png',
-    qtum: 'qtum-qtum-logo.png',
-    waves: 'waves-waves-logo.png',
-    dash: 'dash-dash-logo.png',
-    zec: 'zcash-zec-logo.png',
-    ordi: 'ordi-ordi-logo.png',
-    tao: 'bittensor-tao-logo.png',
-    akt: 'akash-network-akt-logo.png',
+// Returns { SHORTSYMBOL: logoUrl } for every symbol in shortSymbols.
+async function getCoinLogoUrls(shortSymbols) {
+    const now = Date.now();
+    const { logoCache } = await chrome.storage.local.get('logoCache');
+    const cache = logoCache || {};
 
-    // DeFi / infra
-    grt: 'the-graph-grt-logo.png',
-    mkr: 'maker-mkr-logo.png',
-    aave: 'aave-aave-logo.png',
-    algo: 'algorand-algo-logo.png',
-    qnt: 'quant-qnt-logo.png',
-    ldo: 'lido-dao-ldo-logo.png',
-    rune: 'thorchain-rune-logo.png',
-    crv: 'curve-dao-token-crv-logo.png',
-    snx: 'synthetix-snx-logo.png',
-    comp: 'compound-comp-logo.png',
-    cake: 'pancakeswap-cake-logo.png',
-    '1inch': '1inch-1inch-logo.png',
-    yfi: 'yearn-finance-yfi-logo.png',
-    ankr: 'ankr-ankr-logo.png',
-    zrx: '0x-zrx-logo.png',
-    lrc: 'loopring-lrc-logo.png',
-    bal: 'balancer-bal-logo.png',
-    woo: 'wootrade-woo-logo.png',
-    dydx: 'dydx-chain-dydx-logo.png',
-    ens: 'ethereum-name-service-ens-logo.png',
-    cvx: 'convex-finance-cvx-logo.png',
-    rpl: 'rocket-pool-rpl-logo.png',
-    pyth: 'pyth-network-pyth-logo.png',
-    strk: 'starknet-token-strk-logo.png',
+    const missing = shortSymbols.filter(s => {
+        const entry = cache[s.toUpperCase()];
+        return !entry || (now - entry.fetchedAt) > LOGO_CACHE_TTL_MS;
+    });
 
-    // NFT / gaming / metaverse
-    sand: 'the-sandbox-sand-logo.png',
-    mana: 'decentraland-mana-logo.png',
-    axs: 'axie-infinity-axs-logo.png',
-    kas: 'kaspa-kas-logo.png',
-    gala: 'gala-gala-logo.png',
-    ape: 'apecoin-ape-ape-logo.png',
-    enj: 'enjin-coin-enj-logo.png',
-    hot: 'holo-hot-logo.png',
-    rvn: 'ravencoin-rvn-logo.png',
-    bat: 'basic-attention-token-bat-logo.png',
-    zil: 'zilliqa-zil-logo.png',
-    omg: 'omg-omg-logo.png',
-    mina: 'mina-mina-logo.png',
+    if (missing.length) {
+        try {
+            const query = missing.map(s => s.toLowerCase()).join(',');
+            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&symbols=${query}`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                const imageBySymbol = {};
+                // CoinGecko sorts by market cap desc; first hit per symbol wins.
+                for (const coin of data) {
+                    const sym = coin.symbol.toUpperCase();
+                    if (!imageBySymbol[sym]) imageBySymbol[sym] = coin.image;
+                }
+                for (const s of missing) {
+                    cache[s.toUpperCase()] = { url: imageBySymbol[s.toUpperCase()] || null, fetchedAt: now };
+                }
+                await chrome.storage.local.set({ logoCache: cache });
+            }
+        } catch (err) {
+            console.error('CoinGecko logo fetch error', err);
+        }
+    }
 
-    // Newer / meme
-    pepe: 'pepe-pepe-logo.png',
-    wld: 'worldcoin-org-wld-logo.png',
-    fet: 'artificial-superintelligence-alliance-fet-logo.png',
-    wif: 'dogwifhat-wif-logo.png',
-    bonk: 'bonk1-bonk-logo.png',
-    floki: 'floki-inu-floki-logo.png',
-    jup: 'jupiter-ag-jup-logo.png',
-    ftt: 'ftx-token-ftt-logo.png',
-    xec: 'ecash-xec-logo.png',
-};
-
-function getCoinLogoUrl(shortSymbol) {
-    const file = COIN_LOGOS[shortSymbol.toLowerCase()] || COIN_LOGOS.btc;
-    return `https://cryptologos.cc/logos/${file}`;
+    const result = {};
+    for (const s of shortSymbols) {
+        const entry = cache[s.toUpperCase()];
+        result[s.toUpperCase()] = (entry && entry.url) || buildFallbackLogo(s);
+    }
+    return result;
 }

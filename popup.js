@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCoinInput = document.getElementById("add-coin-input");
     const addCoinBtn = document.getElementById("add-coin-btn");
     const addCoinError = document.getElementById("add-coin-error");
+    const exchangeCheckboxes = document.querySelectorAll('.exchange-checkbox-input');
+    const marketTypeCheckboxes = document.querySelectorAll('.market-type-checkbox-input');
 
     if (!coinCardsContainer || !updateTimeDiv) {
         console.error('Missing DOM elements in popup.html');
@@ -13,25 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Map to store previous prices for each coin (for up/down animation)
     const previousPrices = {};
 
-    // Current tracked symbols
-    let trackedSymbols = ["BTCUSDT", "ETHUSDT"];
+    // Current tracked coins (short symbols, e.g. "BTC"), selected exchange + market type
+    let trackedCoins = ['BTC', 'ETH'];
+    let exchangeId = DEFAULT_EXCHANGE_ID;
+    let marketType = DEFAULT_MARKET_TYPE;
 
-    function getShortName(symbol) {
-        return symbol.replace('USDT', '');
-    }
-
-    async function fetchPrice(symbol) {
-        // klines interval=1d bắt đầu từ 00:00 UTC (tức 7h sáng giờ VN)
-        const res = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=1`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (!data[0] || !data[0][4]) throw new Error('No price in response');
-        
-        const openPrice = parseFloat(data[0][1]); // Giá mở cửa lúc 7h sáng
-        const currentPrice = parseFloat(data[0][4]); // Giá hiện tại
-        const change = ((currentPrice - openPrice) / openPrice) * 100;
-        
-        return { price: currentPrice, change: change };
+    async function fetchPrice(shortSymbol) {
+        const exchange = getExchange(exchangeId);
+        return await exchange.fetchPrice(exchange.toApiSymbol(shortSymbol, marketType), marketType);
     }
 
     async function fetchMultiplePrices(symbols) {
@@ -53,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderCoinCards(results) {
+    function renderCoinCards(results, logoUrls) {
         coinCardsContainer.innerHTML = '';
 
         if (results.length === 0) {
@@ -69,9 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { symbol, price } = result.value;
                 const currentPrice = price.price;
                 const change = price.change;
-                const short = getShortName(symbol);
-                
-                const iconUrl = getCoinLogoUrl(short);
+                const iconUrl = logoUrls[symbol.toUpperCase()];
 
                 const formattedPrice = formatPriceValue(currentPrice);
 
@@ -89,54 +78,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (directionClass) {
                     card.classList.add(directionClass);
                 }
-                
-                const changeColor = change >= 0 ? '#228B22' : '#DC143C';
+                card.classList.add(change >= 0 ? 'coin-trend-up' : 'coin-trend-down');
+
                 const changeSign = change > 0 ? '+' : '';
 
-                // Tránh lỗi CSP bằng cách bỏ onerror inline và gắn sự kiện bằng addEventListener
-                const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23FF9900'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>${short.slice(0,3)}</text></svg>`;
-
                 card.innerHTML = `
-                    <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${short}">✕</button>
-                    <div class="coin-card-header">
-                        <img src="${iconUrl}" class="coin-icon" alt="${short}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;">
-                        <span class="coin-name">${short}</span>
-                    </div>
-                    <div class="coin-price">${formattedPrice}</div>
-                    <div class="coin-pair">
-                        USDT <span style="color: ${changeColor}; font-weight: bold; margin-left: 4px;">${changeSign}${change.toFixed(2)}%</span>
+                    <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${symbol}">✕</button>
+                    <div class="coin-row">
+                        <div class="coin-info">
+                            <img src="${iconUrl}" class="coin-icon" alt="${symbol}">
+                            <span class="coin-name">${symbol}</span>
+                        </div>
+                        <div class="coin-values">
+                            <div class="coin-price">${formattedPrice}</div>
+                            <div class="coin-pair">${changeSign}${change.toFixed(2)}%</div>
+                        </div>
                     </div>
                 `;
-                
+
                 const imgEl = card.querySelector('img.coin-icon');
                 if (imgEl) {
-                    imgEl.addEventListener('error', function() {
-                        this.src = fallbackSvg;
+                    imgEl.addEventListener('error', function () {
+                        this.src = buildFallbackLogo(symbol);
                     }, { once: true });
                 }
             } else {
                 // Failed to fetch - still show card with symbol info
-                const symbol = trackedSymbols[index];
-                const short = symbol ? getShortName(symbol) : 'ERR';
-                
-                const iconUrl = getCoinLogoUrl(short);
-                const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23DC143C'/><text x='50' y='50' font-size='30' text-anchor='middle' alignment-baseline='central' fill='white' font-weight='bold'>ERR</text></svg>`;
+                const symbol = trackedCoins[index] || 'ERR';
+                const iconUrl = logoUrls[symbol.toUpperCase()] || buildFallbackLogo(symbol);
 
                 card.innerHTML = `
-                    <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${short}">✕</button>
-                    <div class="coin-card-header">
-                        <img src="${iconUrl}" class="coin-icon" alt="${short}" style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;">
-                        <span class="coin-name">${short}</span>
+                    <button class="remove-coin-btn" data-symbol="${symbol}" title="Xóa ${symbol}">✕</button>
+                    <div class="coin-row">
+                        <div class="coin-info">
+                            <img src="${iconUrl}" class="coin-icon" alt="${symbol}">
+                            <span class="coin-name">${symbol}</span>
+                        </div>
+                        <div class="coin-values">
+                            <div class="coin-price">Lỗi tải</div>
+                        </div>
                     </div>
-                    <div class="coin-price">Lỗi tải</div>
-                    <div class="coin-pair">USDT</div>
                 `;
                 card.classList.add('coin-card-error');
-                
+
                 const imgEl = card.querySelector('img.coin-icon');
                 if (imgEl) {
-                    imgEl.addEventListener('error', function() {
-                        this.src = fallbackSvg;
+                    imgEl.addEventListener('error', function () {
+                        this.src = buildFallbackLogo(symbol);
                     }, { once: true });
                 }
             }
@@ -162,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function removeCoin(symbol) {
-        trackedSymbols = trackedSymbols.filter(s => s !== symbol);
+        trackedCoins = trackedCoins.filter(s => s !== symbol);
         delete previousPrices[symbol];
         saveAndRefresh();
     }
@@ -171,26 +159,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const raw = input.trim().toUpperCase();
         if (!raw) return;
 
-        // Normalize: if user typed "BTC", convert to "BTCUSDT"
-        const symbol = raw.endsWith('USDT') ? raw : raw + 'USDT';
+        // Normalize: if user typed "BTCUSDT", keep just the short symbol "BTC"
+        const symbol = raw.endsWith('USDT') ? raw.slice(0, -4) : raw;
+        if (!symbol) return;
 
         // Check if already tracked
-        if (trackedSymbols.includes(symbol)) {
-            showError(`${getShortName(symbol)} đã có trong danh sách`);
+        if (trackedCoins.includes(symbol)) {
+            showError(`${symbol} đã có trong danh sách`);
             return;
         }
 
-        // Validate by trying to fetch price
+        // Validate by trying to fetch price on the currently selected exchange
         addCoinBtn.disabled = true;
         addCoinBtn.textContent = '…';
         try {
             await fetchPrice(symbol);
-            trackedSymbols.push(symbol);
+            trackedCoins.push(symbol);
             addCoinInput.value = '';
             clearError();
             saveAndRefresh();
         } catch (err) {
-            showError(`Không tìm thấy "${raw}" trên Binance Futures`);
+            const marketLabel = marketType === 'futures' ? 'Futures' : 'Spot';
+            showError(`Không tìm thấy "${raw}" trên ${getExchange(exchangeId).label} (${marketLabel})`);
         } finally {
             addCoinBtn.disabled = false;
             addCoinBtn.textContent = '＋';
@@ -209,19 +199,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function saveAndRefresh() {
-        chrome.storage.local.set({ selectedSymbols: trackedSymbols });
+        setTrackedCoins(trackedCoins);
         updateAllPrices();
     }
 
     async function updateAllPrices() {
-        if (trackedSymbols.length === 0) {
+        if (trackedCoins.length === 0) {
             coinCardsContainer.innerHTML = '<div class="no-coins">Thêm coin bằng ô nhập phía dưới</div>';
             updateTimeDiv.textContent = 'Chưa có dữ liệu';
             return;
         }
 
-        const results = await fetchMultiplePrices(trackedSymbols);
-        renderCoinCards(results);
+        const [results, logoUrls] = await Promise.all([
+            fetchMultiplePrices(trackedCoins),
+            getCoinLogoUrls(trackedCoins)
+        ]);
+        renderCoinCards(results, logoUrls);
         updateTimeDiv.textContent = 'Cập nhật lúc: ' + new Date().toLocaleTimeString('vi-VN');
     }
 
@@ -235,18 +228,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Restore saved selections from storage
-    chrome.storage.local.get(["selectedSymbols", "selectedSymbol"], (result) => {
-        if (result.selectedSymbols && result.selectedSymbols.length > 0) {
-            trackedSymbols = result.selectedSymbols;
-        } else if (result.selectedSymbol) {
-            trackedSymbols = [result.selectedSymbol];
-        } else {
-            trackedSymbols = ["BTCUSDT", "ETHUSDT"];
+    // Only one checkbox per group can be active at a time (radio behavior via checkboxes).
+    // Trying to uncheck the active one snaps it back checked - there's always exactly one selection.
+    function setupExclusiveCheckboxGroup(checkboxes, onSelect) {
+        function setActive(value) {
+            checkboxes.forEach(cb => { cb.checked = (cb.value === value); });
         }
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (!cb.checked) {
+                    cb.checked = true;
+                    return;
+                }
+                setActive(cb.value);
+                onSelect(cb.value);
+            });
+        });
+        return setActive;
+    }
 
+    // Switching exchange or market type re-fetches every tracked coin from the
+    // new source and tells the background badge to do the same.
+    const setActiveExchangeCheckbox = setupExclusiveCheckboxGroup(exchangeCheckboxes, (value) => {
+        exchangeId = value;
+        setSelectedExchangeId(exchangeId);
+        chrome.runtime.sendMessage({ type: 'refreshPrices' });
         updateAllPrices();
     });
+
+    const setActiveMarketTypeCheckbox = setupExclusiveCheckboxGroup(marketTypeCheckboxes, (value) => {
+        marketType = value;
+        setSelectedMarketType(marketType);
+        chrome.runtime.sendMessage({ type: 'refreshPrices' });
+        updateAllPrices();
+    });
+
+    // Restore saved coins + exchange + market type from storage, then start polling
+    (async () => {
+        trackedCoins = await getTrackedCoins();
+        exchangeId = await getSelectedExchangeId();
+        marketType = await getSelectedMarketType();
+        setActiveExchangeCheckbox(exchangeId);
+        setActiveMarketTypeCheckbox(marketType);
+
+        updateAllPrices();
+    })();
 
     // Auto-refresh prices every 3 seconds
     const priceIntervalId = setInterval(updateAllPrices, 3000);
